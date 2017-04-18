@@ -1,3 +1,12 @@
+// Width and height of the block
+const WIDTH = 101;
+const HEIGHT = 83;
+
+// Get a random rumber between max and min
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 // Enemies our player must avoid
 var Enemy = function() {
     // Variables applied to each of our instances go here,
@@ -14,6 +23,12 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
+    if (this.x > WIDTH * 5) {
+        this.x = -WIDTH * getRandomInt(1, 10);
+        this.velocity = getRandomInt(100, 300);
+    } else {
+        this.x += (dt * this.velocity);
+    }
 };
 
 // Draw the enemy on the screen, required method for game
@@ -38,14 +53,14 @@ Player.prototype.render = function() {
 
 Player.prototype.handleInput = function(direction) {
     console.log(direction);
-    if (direction === 'left') {
-        this.x -= 101;
-    } else if (direction === 'right') {
-        this.x += 101;
-    } else if (direction === 'up') {
-        this.y -= 83;
-    } else if (direction === 'down') {
-        this.y += 83;
+    if (direction === 'left' && this.x > 0) {
+        this.x -= WIDTH;
+    } else if (direction === 'right' && this.x < WIDTH * 4) {
+        this.x += WIDTH;
+    } else if (direction === 'up' && this.y > HEIGHT * 1 - HEIGHT / 3) {
+        this.y -= HEIGHT;
+    } else if (direction === 'down' && this.y < HEIGHT * 5  - HEIGHT / 3) {
+        this.y += HEIGHT;
     }
 };
 
@@ -54,8 +69,16 @@ Player.prototype.handleInput = function(direction) {
 // Place the player object in a variable called player
 var allEnemies = [];
 var player = new Player();
-player.x = 101 * 2;
-player.y = 83 * 5;
+player.x = WIDTH * 2;
+player.y = HEIGHT * 5 - HEIGHT / 3;
+
+for (i = 0; i < 5; i++) {
+    var enemy = new Enemy();
+    enemy.x = - WIDTH * getRandomInt(1, 10);
+    enemy.y = HEIGHT * (i < 3 ? i + 1 : 5 - i) - HEIGHT / 3;
+    enemy.velocity = getRandomInt(100, 400);
+    allEnemies.push(enemy);
+}
 
 
 // This listens for key presses and sends the keys to your
