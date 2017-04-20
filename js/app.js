@@ -33,8 +33,17 @@ Enemy.prototype.render = function() {
 };
 
 // Check if enemy collid with player
-Enemy.prototype.checkCollisions = function() {
-
+Enemy.prototype.checkCollisions = function(player) {
+  if (this.yUnit === player.yUnit) {
+    this.left = this.x;
+    this.right = this.x + 80;
+    player.left = player.x;
+    player.right = player.x + 50;
+    if (this.right > player.left && this.left < player.right) {
+      return true;
+    }
+  }
+  return false;
 };
 
 // Now write your own player class
@@ -61,11 +70,13 @@ Player.prototype.handleInput = function(direction) {
     this.x -= 101;
   } else if (direction === 'right' && this.x < 101 * 4) {
     this.x += 101;
-  } else if (direction === 'up' && this.y > 83 * 1 - 83 / 3) {
+  } else if (direction === 'up' && this.yUnit > 1) {
+    this.yUnit -= 1;
     this.y -= 83;
-  } else if (direction === 'down' && this.y < 83 * 5  - 83 / 3) {
+  } else if (direction === 'down' && this.yUnit < 5) {
+    this.yUnit +=1;
     this.y += 83;
-  } else if (direction === 'up' && this.y <= 83 * 1 - 83 / 3) {
+  } else if (direction === 'up' && this.yUnit === 1) {
     this.reset();
   }
 };
@@ -77,22 +88,49 @@ Player.prototype.init = function() {
 };
 
 Player.prototype.reset = function() {
-  console.log('reset')
   this.x = 101 * 2;
   this.yUnit = 5;
   this.y = this.yUnit * 83 - 25;
 };
 
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
-var allEnemies = [];
-var player = new Player();
+// Use Game to control the game
+var Game = function() {
+  this.init();
+};
 
-for (i = 0; i < 5; i++) {
-  var enemy = new Enemy();
-  allEnemies.push(enemy);
-}
+Game.prototype.init = function() {
+  this.player = new Player();
+  this.allEnemies = [];
+  for (var i = 0; i <5; i++) {
+    var enemy = new Enemy();
+    this.allEnemies.push(enemy);
+  }
+};
+
+Game.prototype.update = function(dt) {
+  this.player.update();
+  this.allEnemies.forEach(function(enemy) {
+    enemy.update(dt);
+  });
+};
+
+Game.prototype.render = function() {
+  this.player.render();
+  this.allEnemies.forEach(function(enemy) {
+    enemy.render();
+  });
+};
+
+Game.prototype.checkCollisions = function() {
+  var player = this.player;
+  this.allEnemies.forEach(function(enemy) {
+    if (enemy.checkCollisions(player)) {
+      player.reset();
+    }
+  });
+};
+
+var game = new Game();
 
 
 // This listens for key presses and sends the keys to your
@@ -105,5 +143,5 @@ document.addEventListener('keyup', function(e) {
     40: 'down'
   };
 
-  player.handleInput(allowedKeys[e.keyCode]);
+  game.player.handleInput(allowedKeys[e.keyCode]);
 });
