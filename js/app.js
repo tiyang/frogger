@@ -13,15 +13,14 @@ Enemy.prototype.init = function() {
   this.x = - 101 * getRandomInt(1, 10);
   this.yUnit = getRandomInt(1, 3);
   this.y = this.yUnit * 83 - 25;
-  this.velocity = getRandomInt(100, 400);
+  this.velocity = getRandomInt(100, 300);
 }
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
   if (this.x > 101 * 5) {
-    this.x = -101 * getRandomInt(1, 10);
-    this.velocity = getRandomInt(100, 300);
+    this.init();
   } else {
     this.x += (dt * this.velocity);
   }
@@ -54,8 +53,16 @@ var Player = function() {
   this.init();
 };
 
-Player.prototype.update = function(dt) {
+Player.prototype.checkSuccess = function() {
+  if (this.yUnit === 0) {
+    this.score += 10;
+    this.yUnit = 5;
+    this.y = this.yUnit * 83 - 25;
+  }
+}
 
+Player.prototype.update = function(dt) {
+  this.checkSuccess();
 };
 
 Player.prototype.render = function() {
@@ -70,14 +77,12 @@ Player.prototype.handleInput = function(direction) {
     this.x -= 101;
   } else if (direction === 'right' && this.x < 101 * 4) {
     this.x += 101;
-  } else if (direction === 'up' && this.yUnit > 1) {
+  } else if (direction === 'up' && this.yUnit > 0) {
     this.yUnit -= 1;
     this.y -= 83;
   } else if (direction === 'down' && this.yUnit < 5) {
     this.yUnit +=1;
     this.y += 83;
-  } else if (direction === 'up' && this.yUnit === 1) {
-    this.reset();
   }
 };
 
@@ -85,6 +90,8 @@ Player.prototype.init = function() {
   this.x = 101 * 2;
   this.yUnit = 5;
   this.y = this.yUnit * 83 - 25;
+  this.life = 3;
+  this.score = 0;
 };
 
 Player.prototype.reset = function() {
@@ -125,10 +132,19 @@ Game.prototype.checkCollisions = function() {
   var player = this.player;
   this.allEnemies.forEach(function(enemy) {
     if (enemy.checkCollisions(player)) {
+      player.life -= 1;
       player.reset();
+      if (player.life === 0) {
+        game.reset();
+      }
     }
   });
 };
+
+Game.prototype.reset = function() {
+  this.player.score = 0;
+  this.player.life = 3;
+}
 
 var game = new Game();
 
