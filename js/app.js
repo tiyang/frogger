@@ -13,7 +13,7 @@ Enemy.prototype.init = function() {
   this.x = - 101 * getRandomInt(1, 10);
   this.yUnit = getRandomInt(1, 3);
   this.y = this.yUnit * 83 - 25;
-  this.velocity = getRandomInt(100, 300);
+  this.velocity = 100 * (4 - this.yUnit);
 }
 
 // Update the enemy's position, required method for game
@@ -55,11 +55,12 @@ var Player = function() {
 
 Player.prototype.checkSuccess = function() {
   if (this.yUnit === 0) {
+    sound.waterSonud.play();
     this.score += 10;
     this.yUnit = 5;
     this.y = this.yUnit * 83 - 25;
   }
-}
+};
 
 Player.prototype.update = function(dt) {
   this.checkSuccess();
@@ -71,8 +72,6 @@ Player.prototype.render = function() {
 
 Player.prototype.handleInput = function(direction) {
   if (!direction) return;
-  console.log(direction);
-  console.log(this.y);
   if (direction === 'left' && this.x > 0) {
     this.x -= 101;
   } else if (direction === 'right' && this.x < 101 * 4) {
@@ -92,6 +91,7 @@ Player.prototype.init = function() {
   this.y = this.yUnit * 83 - 25;
   this.life = 3;
   this.score = 0;
+  this.highest = 0;
 };
 
 Player.prototype.reset = function() {
@@ -99,6 +99,50 @@ Player.prototype.reset = function() {
   this.yUnit = 5;
   this.y = this.yUnit * 83 - 25;
 };
+
+// Gem
+// Player can collect gems to earn scores
+var Gem = function(type) {
+  this.init(type);
+};
+
+Gem.prototype.init = function(type) {
+  this.x = 101 * getRandomInt(0, 4);
+  this.yUnit = getRandomInt(1, 3);
+  this.y = this.yUnit * 83 - 25;
+  if (type === 1) {
+    this.sprite = 'images/Gem Blue.png';
+  } else if (type === 2) {
+    this.sprite = 'images/Gem Green.png';
+  } else if (type === 3) {
+    this.sprite = 'images/Gem Orange.png';
+  }
+};
+
+Gem.prototype.render = function() {
+  ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+Gem.prototype.checkCollisions = function(player) {
+  if (this.yUnit === player.yUnit) {
+    this.left = this.x;
+    this.right = this.x + 82;
+    player.left = player.x;
+    player.right = player.x + 50;
+    if (this.right > player.left && this.left < player.right) {
+      return true;
+    }
+  }
+  return false;
+};
+
+// Sound effects
+var sound = {
+  bugSound: new Audio('audios/bug.wav'),
+  gemSound: new Audio('audios/gem.wav'),
+  waterSonud: new Audio('audios/water.wav'),
+  loseSound: new Audio('audios/lose.flac'),
+}
 
 // Use Game to control the game
 var Game = function() {
@@ -112,6 +156,7 @@ Game.prototype.init = function() {
     var enemy = new Enemy();
     this.allEnemies.push(enemy);
   }
+  this.spawnGem();
 };
 
 Game.prototype.update = function(dt) {
@@ -122,6 +167,7 @@ Game.prototype.update = function(dt) {
 };
 
 Game.prototype.render = function() {
+  this.gem.render();
   this.player.render();
   this.allEnemies.forEach(function(enemy) {
     enemy.render();
@@ -130,20 +176,36 @@ Game.prototype.render = function() {
 
 Game.prototype.checkCollisions = function() {
   var player = this.player;
+  $this = this;
   this.allEnemies.forEach(function(enemy) {
     if (enemy.checkCollisions(player)) {
+      sound.bugSound.play();
       player.life -= 1;
       player.reset();
       if (player.life === 0) {
-        game.reset();
+        sound.loseSound.play();
+        if (player.score > player.highest) {
+          player.highest = player.score;
+        }
+        $this.reset();
       }
     }
   });
+  if (this.gem.checkCollisions(player)) {
+    sound.gemSound.play();
+    this.player.score += 100;
+    this.spawnGem();
+  }
 };
 
 Game.prototype.reset = function() {
   this.player.score = 0;
   this.player.life = 3;
+};
+
+Game.prototype.spawnGem = function() {
+  var type = getRandomInt(1, 3);
+  this.gem = new Gem(type);
 }
 
 var game = new Game();

@@ -23,6 +23,7 @@ var Engine = (function(global) {
         win = global.window,
         life = doc.getElementById('life'),
         score = doc.getElementById('score'),
+        highest = doc.getElementById('highest'),
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
         lastTime;
@@ -32,6 +33,8 @@ var Engine = (function(global) {
     doc.body.appendChild(canvas);
     life.innerHTML = game.player.life;
     score.innerHTML = game.player.score;
+    highest.innerHTML = game.player.highest;
+
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
      */
@@ -86,6 +89,7 @@ var Engine = (function(global) {
         checkCollisions();
         life.innerHTML = game.player.life;
         score.innerHTML = game.player.score;
+        highest.innerHTML = game.player.highest;
     }
 
     /* This is called by the update function and loops through all of the
@@ -170,7 +174,11 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-boy.png',
+        'images/char-cat-girl.png',
+        'images/Gem Blue.png',
+        'images/Gem Green.png',
+        'images/Gem Orange.png',
     ]);
     Resources.onReady(init);
 
