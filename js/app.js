@@ -72,6 +72,7 @@ Player.prototype.render = function() {
 
 Player.prototype.handleInput = function(direction) {
   if (!direction) return;
+  sound.moveSound.play();
   if (direction === 'left' && this.x > 0) {
     this.x -= 101;
   } else if (direction === 'right' && this.x < 101 * 4) {
@@ -137,12 +138,29 @@ Gem.prototype.checkCollisions = function(player) {
 };
 
 // Sound effects
-var sound = {
-  bugSound: new Audio('audios/bug.wav'),
-  gemSound: new Audio('audios/gem.wav'),
-  waterSonud: new Audio('audios/water.wav'),
-  loseSound: new Audio('audios/lose.flac'),
-}
+var Sound = function() {
+  this.moveSound = new Howl({
+    src: ['audios/move.wav']
+  });
+  this.bugSound = new Howl({
+    src: ['audios/bug.wav']
+  });
+  this.gemSound = new Howl({
+    src: ['audios/gem.wav']
+  });
+  this.waterSonud = new Howl({
+    src: ['audios/water.wav']
+  });
+  this.loseSound = new Howl({
+    src: ['audios/lose.flac']
+  });
+  this.loopSound = new Howl({
+    src: ['audios/8-bit-loop.mp3'],
+    loop: true
+  });
+};
+
+var sound = new Sound();
 
 // Use Game to control the game
 var Game = function() {
@@ -157,6 +175,7 @@ Game.prototype.init = function() {
     this.allEnemies.push(enemy);
   }
   this.spawnGem();
+  sound.loopSound.play();
 };
 
 Game.prototype.update = function(dt) {
