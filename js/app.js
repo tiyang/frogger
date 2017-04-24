@@ -242,3 +242,12 @@ document.addEventListener('keyup', function(e) {
 
   game.player.handleInput(allowedKeys[e.keyCode]);
 });
+
+// Select character
+var charSelect = document.getElementById('char-select');
+charSelect.addEventListener('change', function() {
+  var char = charSelect.value;
+  var charUrl = 'images/' + char + '.png';
+  game.player.sprite = charUrl;
+  charSelect.blur();
+});
